@@ -1,0 +1,110 @@
+create table movie(
+MovieName varchar2(25) primary key,
+ReleaseDate date not null ,
+Aspect_ratio VARCHAR(10) not null,
+Movie_Format VARCHAR(10) not null,
+ticketPrice int not null,
+Movieprice int not null,
+collection int,
+showspd int);
+desc movie;
+
+create table shows(
+Roomno varchar2(25),
+Dos date,
+ticketAvailable int,
+totalTicket int,
+MovieName varchar2(25),
+adsPerm varchar2(10),
+showno int,
+foreign key(MovieName) references movie(MovieName));
+desc shows;
+
+
+
+create table temp as (select * from shows);
+create or replace trigger price_calc before insert on shows for each row 
+declare 
+    tp number; 
+    prod number; 
+    nts number; 
+    colec number; 
+begin 
+     insert into temp values(:NEW.roomno,:NEW.dos,:NEW.ticketavailable,:NEW.totalticket,:NEW.moviename,:NEW.ADSPERM,:NEW.showno); 
+    dbms_output.put_line(:NEW.showno||' '||:NEW.moviename); 
+    select ticketavailable into nts from temp where showno=:NEW.showno and moviename=:NEW.moviename; 
+    select ticketprice into tp from movie where moviename=:NEW.moviename; 
+    prod:=tp*nts; 
+    dbms_output.put_line(prod); 
+    select collection into colec from movie where moviename=:NEW.moviename; 
+    colec:=colec+prod; 
+    dbms_output.put_line(colec); 
+    update movie set collection=colec where moviename=:NEW.moviename; 
+     dbms_output.put_line('done'); 
+end; 
+/
+
+insert into movie values('ZSJL',TO_DATE('18/03/2021','DD/MM/YYYY'),'16:9','Reel',250,20000,1700,5);
+insert into movie values('Memento',TO_DATE('16/03/2001','DD/MM/YYYY'),'4:3','Digital',450,10000,1700,9);
+insert into movie values('Gone Girl',TO_DATE('14/10/2014','DD/MM/YYYY'),'2:35:1','Digital',750,80000,1700,5);
+insert into movie values('The Batman',TO_DATE('04/03/2022','DD/MM/YYYY'),'4:3','Reel',1050,60000,170000,12);
+insert into movie values('Avengers Endgame',TO_DATE('26/04/2019','DD/MM/YYYY'),'16:9','Digital',250,30000,1700,3);
+insert into movie values('Spiderman:No Way Home',TO_DATE('17/12/2021','DD/MM/YYYY'),'16:9','Digital',150,10000,1700,5);
+insert into movie values('Eternals',TO_DATE('05/09/2021','DD/MM/YYYY'),'4:3','Reel',1950,90000,1700,5);
+
+select * from movie;
+update movie set movieprice=9000 where MovieName='Avengers Endgame';
+insert into shows values('T1',TO_DATE('18/03/2021','DD/MM/YYYY'),36,100,'ZSJL','YES',3);
+insert into shows values('T5',TO_DATE('16/03/2001','DD/MM/YYYY'),28,200,'Memento','NO',5);
+insert into shows values('T3',TO_DATE('14/10/2014','DD/MM/YYYY'),12,150,'Gone Girl','YES',1);
+insert into shows values('T2',TO_DATE('04/03/2022','DD/MM/YYYY'),1,150,'The Batman','NO',4);
+insert into shows values('T4',TO_DATE('26/04/2019','DD/MM/YYYY'),120,150,'Avengers Endgame','NO',9);
+insert into shows values('T6',TO_DATE('17/12/2021','DD/MM/YYYY'),23,150,'Spiderman:No Way Home','YES',3);
+insert into shows values('T9(4DX)',TO_DATE('05/09/2021','DD/MM/YYYY'),43,100,'Eternals','YES',6);
+
+select * from shows;
+SELECT * FROM TEMP;
+SELECT * FROM SHOWS;
+
+
+CREATE TABLE employees (
+    emp_id      INT             NOT NULL,
+    birth_date  DATE            NOT NULL,
+    first_name  VARCHAR(14)     NOT NULL,
+    last_name   VARCHAR(16)     NOT NULL,
+    gender      ENUM ('M','F')  NOT NULL,    
+    hire_date   DATE            NOT NULL,
+    dept        VARCHAR(21)    NOT NULL,
+    leaks_confirmed  INT  NOT NULL,
+    leaks_prevented INT NOT NULL,
+     foreign key(MovieName) references movie(MovieName))
+);
+
+select * from movie INNER join shows on movie.MovieName=shows.MovieName ;
+
+
+
+
+nts=no.of ticket sold
+tp=ticket price;
+colec=collection;
+prod=money given back to producer
+DOS=DATE OF SHOW
+Format=REEL OR DIGITAL
+
+insert into movie values('Doctor'TO_DATE('14/09/2018','DD/MM/YYYY'),'2:35:1',250,20000,1700,5);
+select * from movies;
+select * from movie;
+DESC MOVIE;
+
+select Aspect_ratio,ticketPrice from movie where MovieName='ZSJL'; 
+
+select COUNT(*),SUM(collection),AVG(collection) from movie; 
+select * from movie order by MovieName;
+DROP TRIGGER price_calc;
+
+
+ alter table movie ADD CONSTRAINT colleCheck CHECK (collection > 0);
+alter table movie MODIFY collection int NOT NULL;
+select * from movie where MovieName = (select MovieName from shows where ticketAvailable='36');
+select MovieName as "empid" from movie where collection>(select avg(collection) from movie);
